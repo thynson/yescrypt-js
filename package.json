@@ -1,6 +1,14 @@
 {
   "name": "yescrypt-js",
+  "version": "0.0.1",
   "description": "Pure javascript implementation for yescript",
+  "files": [
+    "lib/*.js",
+    "lib/*.ts",
+    "lib/*.map",
+    "src/*.ts",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "test": "jest",
