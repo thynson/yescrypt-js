@@ -2,7 +2,9 @@
   "name": "yescrypt-js",
   "description": "Pure javascript implementation for yescript",
   "scripts": {
-    "build": "tsc -p tsconfig.build.json"
+    "build": "tsc -p tsconfig.build.json",
+    "test": "jest",
+    "test:coverage": "jest --coverage"
   },
   "dependencies": {
     "sjcl": "^1.0.8",
