@@ -69,9 +69,6 @@ export function yescrypt(
     if (!isInt32(flags) || (flags & ~(YESCRYPT_RW | YESCRYPT_WORM | YESCRYPT_PREHASH)) !== 0) {
         throw Error('Unknown flags.');
     }
-    if (flags === 0) {
-        throw 'flags shall be either YESCRYPT_RW or YESCRYPT_WORM';
-    }
 
     if (!isInt32(N)) {
         throw 'N is not an integer.';

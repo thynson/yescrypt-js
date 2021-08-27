@@ -35,6 +35,8 @@ function strToUint8(str: string) {
     return bytes;
 }
 
+jest.setTimeout(300000);
+
 test('Yescrypt', () => {
 
     expect(convertUint8ArrayToHex(yescrypt(strToUint8('p'), strToUint8('s'), 16, 8, 1, 0, 0, 16, YESCRYPT_RW))).toBe(
@@ -51,20 +53,34 @@ test('Yescrypt', () => {
     expect(convertUint8ArrayToHex(yescrypt(strToUint8('p'), strToUint8('s'), 16, 8, 4, 0, 0, 16, YESCRYPT_WORM))).toBe(
         '28e64f65a134d187ed3b16d73973c820',
     );
+    expect(convertUint8ArrayToHex(yescrypt(strToUint8('p'), strToUint8('s'), 16, 8, 1, 0, 0, 16, 0))).toBe(
+        '4efe92b5bba5ee1837b4b02b67dc2dbd',
+    );
 
-    // expect(convertUint8ArrayToHex(yescrypt(strToUint8('p'), strToUint8('s'), 1048576, 8, 1, 0, 0, 16, YESCRYPT_RW))).toBe(
-    //     'b09179269b2b949ae6c79e45e040cd7f',
-    // );
-    // expect(convertUint8ArrayToHex(yescrypt(strToUint8('p'), strToUint8('s'), 1048576, 8, 4, 0, 0, 16, YESCRYPT_RW))).toBe(
-    //     'fdafee4329b22265473264e3522c91d7',
-    // );
+    expect(convertUint8ArrayToHex(yescrypt(strToUint8('p'), strToUint8('s'), 16, 8, 4, 0, 0, 16, 0))).toBe(
+        '3a84ecee9f4d433e8ef75aec28a5daa3',
+    );
 
-    // expect(convertUint8ArrayToHex(yescrypt(strToUint8('p'), strToUint8('s'), 1048576, 8, 1, 0, 0, 16, YESCRYPT_WORM))).toBe(
-    //     '270f0d216fc8d9e64357da861c0ec9ba',
-    // );
-    //
-    // expect(convertUint8ArrayToHex(yescrypt(strToUint8('p'), strToUint8('s'), 1048576, 8, 4, 0, 0, 16, YESCRYPT_WORM))).toBe(
-    //     '524a6a6ff74db4aa91e2beff86de06b1',
-    // );
+    expect(convertUint8ArrayToHex(yescrypt(strToUint8('p'), strToUint8('s'), 16384, 8, 1, 0, 0, 16, YESCRYPT_RW))).toBe(
+        '648a7f55b1f5f083c190829860e09d37',
+    );
+    expect(convertUint8ArrayToHex(yescrypt(strToUint8('p'), strToUint8('s'), 16384, 8, 4, 0, 0, 16, YESCRYPT_RW))).toBe(
+        'ca813c704119b47cbec20ac8faa72dfe',
+    );
 
+    expect(convertUint8ArrayToHex(yescrypt(strToUint8('p'), strToUint8('s'), 16384, 8, 1, 0, 0, 16, YESCRYPT_WORM))).toBe(
+        'd44199db46046d92fb844964c099caa7',
+    );
+
+    expect(convertUint8ArrayToHex(yescrypt(strToUint8('p'), strToUint8('s'), 16384, 8, 4, 0, 0, 16, YESCRYPT_WORM))).toBe(
+        '3d667b9a722cc915fbf008911c88ceca',
+    );
+
+    expect(convertUint8ArrayToHex(yescrypt(strToUint8('p'), strToUint8('s'), 16384, 8, 1, 0, 0, 16, 0))).toBe(
+        '4329787752e75d1de359a05806e492d4',
+    );
+
+    expect(convertUint8ArrayToHex(yescrypt(strToUint8('p'), strToUint8('s'), 16384, 8, 4, 0, 0, 16, 0))).toBe(
+        '949c1fb99e622cb8447b3b1dfd009cd2',
+    );
 });
