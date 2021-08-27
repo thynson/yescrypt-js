@@ -15,8 +15,7 @@
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
-    "sjcl": "^1.0.8",
-    "tslib": "^2.3.1"
+    "sjcl": "^1.0.8"
   },
   "devDependencies": {
     "@types/jest": "^27.0.1",

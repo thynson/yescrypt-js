@@ -1,7 +1,7 @@
 /* eslint-disable */
 // Requires the Stanford Javascript Cryptography Library (SJCL)
 // https://bitwiseshiftleft.github.io/sjcl/
-import sjcl from 'sjcl';
+import sjcl = require('sjcl');
 
 const PwxSimple = 2;
 const PwxGather = 4;
