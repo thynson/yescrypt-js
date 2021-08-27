@@ -442,7 +442,7 @@ function pwxForm(pwxblock: Uint32Array, sbox: SBox) {
                 }
                 l += s0_lo;
                 h += s0_hi;
-                while (l >= 2 ** 32) {
+                if (l >= 2 ** 32) {
                     h += 1;
                     // mul_lo -= 2 ** 32;
                     l >>>= 32;
@@ -566,27 +566,77 @@ function salsa20(cell: Uint32Array, rounds: number) {
 }
 
 function shuffleBlock(r: number, block: Uint32Array) {
-    const saved = new Uint32Array(16);
     for (let i = 0; i < r; i++) {
-        for (let j = 0; j < 16; j++) {
-            saved[j] = block[i * 16 + ((j * 5) & 15)];
-        }
-        for (let j = 0; j < 16; j++) {
-            block[i * 16 + j] = saved[j];
-        }
+        const s0 = block[i * 16 + ((0 * 5) & 15)];
+        const s1 = block[i * 16 + ((1 * 5) & 15)];
+        const s2 = block[i * 16 + ((2 * 5) & 15)];
+        const s3 = block[i * 16 + ((3 * 5) & 15)];
+        const s4 = block[i * 16 + ((4 * 5) & 15)];
+        const s5 = block[i * 16 + ((5 * 5) & 15)];
+        const s6 = block[i * 16 + ((6 * 5) & 15)];
+        const s7 = block[i * 16 + ((7 * 5) & 15)];
+        const s8 = block[i * 16 + ((8 * 5) & 15)];
+        const s9 = block[i * 16 + ((9 * 5) & 15)];
+        const s10 = block[i * 16 + ((10 * 5) & 15)];
+        const s11 = block[i * 16 + ((11 * 5) & 15)];
+        const s12 = block[i * 16 + ((12 * 5) & 15)];
+        const s13 = block[i * 16 + ((13 * 5) & 15)];
+        const s14 = block[i * 16 + ((14 * 5) & 15)];
+        const s15 = block[i * 16 + ((15 * 5) & 15)];
+
+        block[i * 16 + 0] = s0;
+        block[i * 16 + 1] = s1;
+        block[i * 16 + 2] = s2;
+        block[i * 16 + 3] = s3;
+        block[i * 16 + 4] = s4;
+        block[i * 16 + 5] = s5;
+        block[i * 16 + 6] = s6;
+        block[i * 16 + 7] = s7;
+        block[i * 16 + 8] = s8;
+        block[i * 16 + 9] = s9;
+        block[i * 16 + 10] = s10;
+        block[i * 16 + 11] = s11;
+        block[i * 16 + 12] = s12;
+        block[i * 16 + 13] = s13;
+        block[i * 16 + 14] = s14;
+        block[i * 16 + 15] = s15;
     }
 }
 
 function unshuffleBlock(r: number, block: Uint32Array) {
-    const saved = new Uint32Array(16);
     for (let i = 0; i < r; i++) {
-        // Saved = Block[i]
-        for (let j = 0; j < 16; j++) {
-            saved[j] = block[i * 16 + j];
-        }
-        for (let j = 0; j < 16; j++) {
-            block[i * 16 + ((j * 5) & 15)] = saved[j];
-        }
+        const s0 = block[i * 16 + 0];
+        const s1 = block[i * 16 + 1];
+        const s2 = block[i * 16 + 2];
+        const s3 = block[i * 16 + 3];
+        const s4 = block[i * 16 + 4];
+        const s5 = block[i * 16 + 5];
+        const s6 = block[i * 16 + 6];
+        const s7 = block[i * 16 + 7];
+        const s8 = block[i * 16 + 8];
+        const s9 = block[i * 16 + 9];
+        const s10 = block[i * 16 + 10];
+        const s11 = block[i * 16 + 11];
+        const s12 = block[i * 16 + 12];
+        const s13 = block[i * 16 + 13];
+        const s14 = block[i * 16 + 14];
+        const s15 = block[i * 16 + 15];
+        block[i * 16 + ((0 * 5) & 15)] = s0;
+        block[i * 16 + ((1 * 5) & 15)] = s1;
+        block[i * 16 + ((2 * 5) & 15)] = s2;
+        block[i * 16 + ((3 * 5) & 15)] = s3;
+        block[i * 16 + ((4 * 5) & 15)] = s4;
+        block[i * 16 + ((5 * 5) & 15)] = s5;
+        block[i * 16 + ((6 * 5) & 15)] = s6;
+        block[i * 16 + ((7 * 5) & 15)] = s7;
+        block[i * 16 + ((8 * 5) & 15)] = s8;
+        block[i * 16 + ((9 * 5) & 15)] = s9;
+        block[i * 16 + ((10 * 5) & 15)] = s10;
+        block[i * 16 + ((11 * 5) & 15)] = s11;
+        block[i * 16 + ((12 * 5) & 15)] = s12;
+        block[i * 16 + ((13 * 5) & 15)] = s13;
+        block[i * 16 + ((14 * 5) & 15)] = s14;
+        block[i * 16 + ((15 * 5) & 15)] = s15;
     }
 }
 
