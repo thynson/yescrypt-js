@@ -385,41 +385,6 @@ function blockMixPwxForm(r: number, block: Uint32Array, sBox: SBox) {
     }
 }
 
-function multiplyUint64(a: number, b: number): [number, number] {
-    let al = a & 0xffff;
-    let ah = a >>> 16;
-    let bl = b & 0xffff;
-    let bh = b >>> 16;
-
-    let h = ah * bh;
-    let l = al * bl;
-    let p = ah * bl;
-    let q = al * bh;
-
-    l += ((p & 0xffff) << 16) >>> 0;
-    h += p >>> 16;
-    if (l >= 2 ** 32) {
-        h += 1;
-        l -= 2 ** 32;
-    }
-    l += ((q & 0xffff) << 16) >>> 0;
-    h += q >>> 16;
-    if (l >= 2 ** 32) {
-        h += 1;
-        l -= 2 ** 32;
-    }
-    return [h, l];
-}
-
-function addUint64(a: [number, number], b: [number, number]) {
-    a[0] += b[0];
-    a[1] += b[1];
-    if (a[1] >= 2 ** 32) {
-        a[0] += 1;
-        a[1] -= 2 ** 32;
-    }
-}
-
 function blockXor(a: Uint32Array, aOffset: number, b: Uint32Array, bOffset: number, size: number) {
     for (let i = 0; i < size; i++) {
         a[aOffset + i] ^= b[bOffset + i];
@@ -451,24 +416,51 @@ function pwxForm(pwxblock: Uint32Array, sbox: SBox) {
 
                 const s1_lo = sbox.S[S1 + 2 * (p1 * PwxSimple + k)];
                 const s1_hi = sbox.S[S1 + 2 * (p1 * PwxSimple + k) + 1];
+                let al = hi & 0xffff;
+                let ah = hi >>> 16;
+                let bl = lo & 0xffff;
+                let bh = lo >>> 16;
 
-                let M = multiplyUint64(hi, lo);
-                addUint64(M, [s0_hi, s0_lo]);
-                let [mul_hi, mul_lo] = M;
+                let h = ah * bh;
+                let l = al * bl;
+                let p = ah * bl;
+                let q = al * bh;
 
-                mul_lo ^= s1_lo;
-                mul_hi ^= s1_hi;
+                l += ((p & 0xffff) << 16) >>> 0;
+                h += p >>> 16;
+                if (l >= 2 ** 32) {
+                    h += 1;
+                    // mul_lo -= 2 ** 32;
+                    l >>>= 32;
+                }
+                l += ((q & 0xffff) << 16) >>> 0;
+                h += q >>> 16;
+                if (l >= 2 ** 32) {
+                    h += 1;
+                    // mul_lo -= 2 ** 32;
+                    l >>>= 32;
+                }
+                l += s0_lo;
+                h += s0_hi;
+                while (l >= 2 ** 32) {
+                    h += 1;
+                    // mul_lo -= 2 ** 32;
+                    l >>>= 32;
+                }
+
+                l ^= s1_lo;
+                h ^= s1_hi;
 
                 // Make them positive after bitwise op.
-                mul_lo >>>= 0;
-                mul_hi >>>= 0;
+                l >>>= 0;
+                h >>>= 0;
 
-                pwxblock[2 * (j * PwxSimple + k)] = mul_lo;
-                pwxblock[2 * (j * PwxSimple + k) + 1] = mul_hi;
+                pwxblock[2 * (j * PwxSimple + k)] = l;
+                pwxblock[2 * (j * PwxSimple + k) + 1] = h;
 
                 if (i != 0 && i != PwxRounds - 1) {
-                    sbox.S[S2 + 2 * sbox.w] = mul_lo;
-                    sbox.S[S2 + 2 * sbox.w + 1] = mul_hi;
+                    sbox.S[S2 + 2 * sbox.w] = l;
+                    sbox.S[S2 + 2 * sbox.w + 1] = h;
                     sbox.w += 1;
                 }
             }
