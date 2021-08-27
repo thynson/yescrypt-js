@@ -43,11 +43,15 @@ function checkLittleEndian() {
 const isLittleEndian = checkLittleEndian();
 
 function swapEndian(x: number) {
-    const a = x & 0xff,
+    let a = x & 0xff,
         b = x & 0xff00,
         c = x & 0xff0000,
         d = x & 0xff000000;
-    return (a << 24) + (b << 8) + (c >> 8) + (d >> 24);
+    a <<=24;
+    b <<=8;
+    c >>>=8;
+    d >>>=24;
+    return (a | b | c | d) >>> 0;
 }
 
 export function yescrypt(
@@ -192,9 +196,9 @@ function yescryptKdfBody(
         }
     }
     if (!isLittleEndian) {
-        B = B.map(swapEndian);
-        bytes = new Uint8Array(B.buffer);
+        B = B.map(swapEndian)
     }
+    bytes = new Uint8Array(B.buffer);
 
 
     const result = pbkdf2Sha256(password, bytes, 1, Math.max(dkLen, 32));
@@ -261,11 +265,14 @@ function sMix(
             const twoCells = new Uint32Array(blocks.buffer, blocks.byteOffset + i * 2 * r * 16 * 4, 2 * 16);
             sMix1(1, twoCells, SBytes / 128, sboxes[i]!.S, flags & ~YESCRYPT_RW, null);
             if (i == 0) {
-                const for_sha256_update = new Uint8Array(
-                    blocks.buffer,
-                    blocks.byteOffset + (i * 2 * r * 16 + 2 * r * 16 - 16) * 4,
-                    64,
-                );
+                const offset = i * 2 * r * 16 + 2 * r * 16 - 16
+                let b = blocks.slice(offset, offset + 16);
+
+                if (!isLittleEndian) {
+                    b = b.map(swapEndian);
+                }
+
+                const for_sha256_update = new Uint8Array(b.buffer);
                 const sha256_updated = hmacSha256(for_sha256_update, sha256!);
                 sha256!.set(sha256_updated);
             }
