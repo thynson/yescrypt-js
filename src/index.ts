@@ -25,6 +25,30 @@ interface SBox {
     w: number;
 }
 
+function checkLittleEndian() {
+    const u8 = new Uint8Array(2);
+    u8[0] = 0;
+    u8[1] = 0xff;
+    const u16 = new Uint16Array(u8.buffer)[0];
+
+    if (u16 == 0xff) {
+        return false;
+    } else if (u16 == 0xff00) {
+        return true;
+    } else {
+        throw new Error('Broken execution environment: ' + typeof u16);
+    }
+}
+
+const isLittleEndian = checkLittleEndian();
+
+function swapEndian(x: number) {
+    const a = x & 0xff,
+        b = x & 0xff00,
+        c = x & 0xff0000,
+        d = x & 0xff000000;
+    return (a << 24) + (b << 8) + (c >> 8) + (d >> 24);
+}
 
 export function yescrypt(
     password: Uint8Array,
@@ -151,6 +175,10 @@ function yescryptKdfBody(
     // TODO: Switch endianness here on big-endian platforms.
     // View the PBKDF2 results as an array of Uint32.
     let B = new Uint32Array(bytes.buffer);
+    if (!isLittleEndian) {
+        B = B.map(swapEndian);
+    }
+
     if (flags !== 0) {
         password = bytes.slice(0, 32);
     }
@@ -163,6 +191,11 @@ function yescryptKdfBody(
             sMix(N, r, t, 1, Bi, flags, password);
         }
     }
+    if (!isLittleEndian) {
+        B = B.map(swapEndian);
+        bytes = new Uint8Array(B.buffer);
+    }
+
 
     const result = pbkdf2Sha256(password, bytes, 1, Math.max(dkLen, 32));
 
