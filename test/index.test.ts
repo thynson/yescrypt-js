@@ -1,5 +1,22 @@
 import {yescrypt, YESCRYPT_RW, YESCRYPT_WORM} from '../src';
 
+function checkLittleEndian() {
+    const u8 = new Uint8Array(2);
+    u8[0] = 0;
+    u8[1] = 0xff;
+    const u16 = new Uint16Array(u8.buffer)[0];
+
+    if (u16 == 0xff) {
+        return false;
+    } else if (u16 == 0xff00) {
+        return true;
+    } else {
+        throw new Error('Broken execution environment: ' + typeof u16);
+    }
+}
+
+const isLittleEndian = checkLittleEndian();
+console.log('is little endian: ', isLittleEndian);
 function convertUint8ArrayToHex(uint8Array: Uint8Array) {
     let hex = '';
     for (let i = 0; i < uint8Array.length; i++) {
