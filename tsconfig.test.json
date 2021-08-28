@@ -4,5 +4,5 @@
     "types": ["node", "jest"],
     "incremental": false
   },
-  "include":  ["test/**/*.test.ts", "src/**/*.ts"]
+  "include":  ["test/**/*.ts", "src/**/*.ts"]
 }
