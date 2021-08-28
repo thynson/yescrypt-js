@@ -430,24 +430,15 @@ function pwxForm(pwxblock: Uint32Array, sbox: SBox) {
 
                 l += ((p & 0xffff) << 16) >>> 0;
                 h += p >>> 16;
-                if (l >= 2 ** 32) {
-                    h += 1;
-                    // mul_lo -= 2 ** 32;
-                    l >>>= 32;
-                }
                 l += ((q & 0xffff) << 16) >>> 0;
                 h += q >>> 16;
-                if (l >= 2 ** 32) {
-                    h += 1;
-                    // mul_lo -= 2 ** 32;
-                    l >>>= 32;
-                }
                 l += s0_lo;
                 h += s0_hi;
-                if (l >= 2 ** 32) {
+
+                // It shall loop at most 3 times
+                while (l >= 2 ** 32) {
                     h += 1;
-                    // mul_lo -= 2 ** 32;
-                    l >>>= 32;
+                    l -= 2**32;
                 }
 
                 l ^= s1_lo;
