@@ -164,7 +164,7 @@ function yescryptKdfBody(
     dkLen: number,
     flags: number = YESCRYPT_RW,
 ) {
-    if (flags != 0) {
+    if (flags !== 0) {
         let key = 'yescrypt';
         if ((flags & YESCRYPT_PREHASH) !== 0) {
             key += '-prehash';
@@ -299,6 +299,7 @@ function sMix1(
     sBox: SBox | null,
 ) {
     shuffleBlock(2 * r, block);
+    const Y = new Uint32Array(2 * r * 16);
 
     for (let i = 0; i < N; i++) {
         // OutputBlock[i] = Block
@@ -313,7 +314,7 @@ function sMix1(
         }
 
         if (!sBox) {
-            blockMixSalsa8(r, block);
+            blockMixSalsa8(r, block, Y);
         } else {
             blockMixPwxForm(r, block, sBox);
         }
@@ -332,6 +333,7 @@ function sMix2(
     sBox: SBox,
 ) {
     shuffleBlock(2 * r, block);
+    const Y = new Uint32Array(2 * r * 16);
 
     for (let i = 0; i < NLoop; i++) {
         if (false && i % 2 !== 0) {
@@ -347,7 +349,7 @@ function sMix2(
         }
 
         if (sBox === null) {
-            blockMixSalsa8(r, block);
+            blockMixSalsa8(r, block, Y);
         } else {
             blockMixPwxForm(r, block, sBox);
         }
@@ -458,7 +460,7 @@ function pwxForm(pwxblock: Uint32Array, sbox: SBox) {
                 pwxblock[2 * (j * PwxSimple + k)] = l;
                 pwxblock[2 * (j * PwxSimple + k) + 1] = h;
 
-                if (i != 0 && i != PwxRounds - 1) {
+                if (i !== 0 && i !== PwxRounds - 1) {
                     sbox.S[S2 + 2 * sbox.w] = l;
                     sbox.S[S2 + 2 * sbox.w + 1] = h;
                     sbox.w += 1;
@@ -473,9 +475,9 @@ function pwxForm(pwxblock: Uint32Array, sbox: SBox) {
     sbox.w = sbox.w & (Smask >>> 3); // sbox.w & (SMASK / 8);
 }
 
-function blockMixSalsa8(r: number, block: Uint32Array) {
+function blockMixSalsa8(r: number, block: Uint32Array, Y: Uint32Array) {
     const X = block.slice(16 * (2 * r - 1), 16 * 2 * r);
-    const Y = new Uint32Array(2 * r * 16);
+    // const Y = new Uint32Array(2 * r * 16);
     for (let i = 0; i < 2 * r; i++) {
         // X = X XOR Block[i]
         blockXor(X, 0, block, i * 16, 16);
@@ -488,80 +490,107 @@ function blockMixSalsa8(r: number, block: Uint32Array) {
 function salsa20(cell: Uint32Array, rounds: number) {
     unshuffleBlock(1, cell);
 
-    const x = cell.slice(0, 16);
+    let x_0 = cell[0];
+    let x_1 = cell[1];
+    let x_2 = cell[2];
+    let x_3 = cell[3];
+    let x_4 = cell[4];
+    let x_5 = cell[5];
+    let x_6 = cell[6];
+    let x_7 = cell[7];
+    let x_8 = cell[8];
+    let x_9 = cell[9];
+    let x_10 = cell[10];
+    let x_11 = cell[11];
+    let x_12 = cell[12];
+    let x_13 = cell[13];
+    let x_14 = cell[14];
+    let x_15 = cell[15];
 
     let u;
     for (let i = rounds; i > 0; i -= 2) {
-        u = x[0] + x[12];
-        x[4] ^= u <<  7 | u >>> (32 -  7);
-        u = x[4] + x[0];
-        x[8] ^= u <<  9 | u >>> (32 -  9);
-        u = x[8] + x[4];
-        x[12] ^= u <<  13 | u >>> (32 -  13);
-        u = x[12] + x[8];
-        x[0] ^= u <<  18 | u >>> (32 -  18);
-        u = x[5] + x[1];
-        x[9] ^= u <<  7 | u >>> (32 -  7);
-        u = x[9] + x[5];
-        x[13] ^= u <<  9 | u >>> (32 -  9);
-        u = x[13] + x[9];
-        x[1] ^= u <<  13 | u >>> (32 -  13);
-        u = x[1] + x[13];
-        x[5] ^= u <<  18 | u >>> (32 -  18);
-        u = x[10] + x[6];
-        x[14] ^= u <<  7 | u >>> (32 -  7);
-        u = x[14] + x[10];
-        x[2] ^= u <<  9 | u >>> (32 -  9);
-        u = x[2] + x[14];
-        x[6] ^= u <<  13 | u >>> (32 -  13);
-        u = x[6] + x[2];
-        x[10] ^= u <<  18 | u >>> (32 -  18);
-        u = x[15] + x[11];
-        x[3] ^= u <<  7 | u >>> (32 -  7);
-        u = x[3] + x[15];
-        x[7] ^= u <<  9 | u >>> (32 -  9);
-        u = x[7] + x[3];
-        x[11] ^= u <<  13 | u >>> (32 -  13);
-        u = x[11] + x[7];
-        x[15] ^= u <<  18 | u >>> (32 -  18);
-        u = x[0] + x[3];
-        x[1] ^= u <<  7 | u >>> (32 -  7);
-        u = x[1] + x[0];
-        x[2] ^= u <<  9 | u >>> (32 -  9);
-        u = x[2] + x[1];
-        x[3] ^= u <<  13 | u >>> (32 -  13);
-        u = x[3] + x[2];
-        x[0] ^= u <<  18 | u >>> (32 -  18);
-        u = x[5] + x[4];
-        x[6] ^= u <<  7 | u >>> (32 -  7);
-        u = x[6] + x[5];
-        x[7] ^= u <<  9 | u >>> (32 -  9);
-        u = x[7] + x[6];
-        x[4] ^= u <<  13 | u >>> (32 -  13);
-        u = x[4] + x[7];
-        x[5] ^= u <<  18 | u >>> (32 -  18);
-        u = x[10] + x[9];
-        x[11] ^= u <<  7 | u >>> (32 -  7);
-        u = x[11] + x[10];
-        x[8] ^= u <<  9 | u >>> (32 -  9);
-        u = x[8] + x[11];
-        x[9] ^= u <<  13 | u >>> (32 -  13);
-        u = x[9] + x[8];
-        x[10] ^= u <<  18 | u >>> (32 -  18);
-        u = x[15] + x[14];
-        x[12] ^= u <<  7 | u >>> (32 -  7);
-        u = x[12] + x[15];
-        x[13] ^= u <<  9 | u >>> (32 -  9);
-        u = x[13] + x[12];
-        x[14] ^= u <<  13 | u >>> (32 -  13);
-        u = x[14] + x[13];
-        x[15] ^= u <<  18 | u >>> (32 -  18);
+        u = x_0 + x_12;
+        x_4 ^= u <<  7 | u >>> (32 -  7);
+        u = x_4 + x_0;
+        x_8 ^= u <<  9 | u >>> (32 -  9);
+        u = x_8 + x_4;
+        x_12 ^= u <<  13 | u >>> (32 -  13);
+        u = x_12 + x_8;
+        x_0 ^= u <<  18 | u >>> (32 -  18);
+        u = x_5 + x_1;
+        x_9 ^= u <<  7 | u >>> (32 -  7);
+        u = x_9 + x_5;
+        x_13 ^= u <<  9 | u >>> (32 -  9);
+        u = x_13 + x_9;
+        x_1 ^= u <<  13 | u >>> (32 -  13);
+        u = x_1 + x_13;
+        x_5 ^= u <<  18 | u >>> (32 -  18);
+        u = x_10 + x_6;
+        x_14 ^= u <<  7 | u >>> (32 -  7);
+        u = x_14 + x_10;
+        x_2 ^= u <<  9 | u >>> (32 -  9);
+        u = x_2 + x_14;
+        x_6 ^= u <<  13 | u >>> (32 -  13);
+        u = x_6 + x_2;
+        x_10 ^= u <<  18 | u >>> (32 -  18);
+        u = x_15 + x_11;
+        x_3 ^= u <<  7 | u >>> (32 -  7);
+        u = x_3 + x_15;
+        x_7 ^= u <<  9 | u >>> (32 -  9);
+        u = x_7 + x_3;
+        x_11 ^= u <<  13 | u >>> (32 -  13);
+        u = x_11 + x_7;
+        x_15 ^= u <<  18 | u >>> (32 -  18);
+        u = x_0 + x_3;
+        x_1 ^= u <<  7 | u >>> (32 -  7);
+        u = x_1 + x_0;
+        x_2 ^= u <<  9 | u >>> (32 -  9);
+        u = x_2 + x_1;
+        x_3 ^= u <<  13 | u >>> (32 -  13);
+        u = x_3 + x_2;
+        x_0 ^= u <<  18 | u >>> (32 -  18);
+        u = x_5 + x_4;
+        x_6 ^= u <<  7 | u >>> (32 -  7);
+        u = x_6 + x_5;
+        x_7 ^= u <<  9 | u >>> (32 -  9);
+        u = x_7 + x_6;
+        x_4 ^= u <<  13 | u >>> (32 -  13);
+        u = x_4 + x_7;
+        x_5 ^= u <<  18 | u >>> (32 -  18);
+        u = x_10 + x_9;
+        x_11 ^= u <<  7 | u >>> (32 -  7);
+        u = x_11 + x_10;
+        x_8 ^= u <<  9 | u >>> (32 -  9);
+        u = x_8 + x_11;
+        x_9 ^= u <<  13 | u >>> (32 -  13);
+        u = x_9 + x_8;
+        x_10 ^= u <<  18 | u >>> (32 -  18);
+        u = x_15 + x_14;
+        x_12 ^= u <<  7 | u >>> (32 -  7);
+        u = x_12 + x_15;
+        x_13 ^= u <<  9 | u >>> (32 -  9);
+        u = x_13 + x_12;
+        x_14 ^= u <<  13 | u >>> (32 -  13);
+        u = x_14 + x_13;
+        x_15 ^= u <<  18 | u >>> (32 -  18);
     }
 
-    for (let i = 0; i < 16; i++) {
-        cell[i] = (x[i] + cell[i]) >>> 0;
-    }
-
+    cell[0] = (x_0 + cell[0]) >>> 0;
+    cell[1] = (x_1 + cell[1]) >>> 0;
+    cell[2] = (x_2 + cell[2]) >>> 0;
+    cell[3] = (x_3 + cell[3]) >>> 0;
+    cell[4] = (x_4 + cell[4]) >>> 0;
+    cell[5] = (x_5 + cell[5]) >>> 0;
+    cell[6] = (x_6 + cell[6]) >>> 0;
+    cell[7] = (x_7 + cell[7]) >>> 0;
+    cell[8] = (x_8 + cell[8]) >>> 0;
+    cell[9] = (x_9 + cell[9]) >>> 0;
+    cell[10] = (x_10 + cell[10]) >>> 0;
+    cell[11] = (x_11 + cell[11]) >>> 0;
+    cell[12] = (x_12 + cell[12]) >>> 0;
+    cell[13] = (x_13 + cell[13]) >>> 0;
+    cell[14] = (x_14 + cell[14]) >>> 0;
+    cell[15] = (x_15 + cell[15]) >>> 0;
     shuffleBlock(1, cell);
 }
 
