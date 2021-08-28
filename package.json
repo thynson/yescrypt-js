@@ -1,6 +1,6 @@
 {
   "name": "yescrypt-js",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Pure javascript implementation for yescript",
   "files": [
     "lib/*.js",
