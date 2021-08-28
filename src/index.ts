@@ -1,7 +1,7 @@
 /* eslint-disable */
-// Requires the Stanford Javascript Cryptography Library (SJCL)
-// https://bitwiseshiftleft.github.io/sjcl/
-import sjcl = require('sjcl');
+import pbkdf2 = require('pbkdf2');
+import createHash = require('create-hash');
+import createHmac = require('create-hmac');
 
 const PwxSimple = 2;
 const PwxGather = 4;
@@ -164,12 +164,16 @@ function yescryptKdfBody(
     dkLen: number,
     flags: number = YESCRYPT_RW,
 ) {
+    // password = Uint8Array
     if (flags !== 0) {
-        let key = 'yescrypt';
+        //let key = 'yescrypt';
+        let key = [ 121, 101, 115, 99, 114, 121, 112, 116 ];
         if ((flags & YESCRYPT_PREHASH) !== 0) {
-            key += '-prehash';
+            // key += '-prehash';
+            key = key.concat([ 45, 112, 114, 101, 104,  97, 115, 104 ]);
+
         }
-        password = hmacSha256(convertStringToUint8Array(key), password);
+        password = hmacSha256(Uint8Array.from(key), password);
     }
 
     let bytes = pbkdf2Sha256(password, salt, 1, p * 128 * r);
@@ -202,7 +206,9 @@ function yescryptKdfBody(
 
     if ((flags & (YESCRYPT_RW | YESCRYPT_WORM)) !== 0 && (flags & YESCRYPT_PREHASH) === 0) {
         const clientValue = new Uint8Array(result.buffer, result.byteOffset, 32);
-        const clientKey = hmacSha256(clientValue, convertStringToUint8Array('Client Key'));
+        // 'Client Key'
+        const clientKeyBuffer = Uint8Array.from([ 67, 108, 105, 101, 110, 116,  32,  75, 101, 121 ])
+        const clientKey = hmacSha256(clientValue, clientKeyBuffer);
         const storedKey = sha256(clientKey);
 
         result.set(storedKey, 0);
@@ -699,58 +705,20 @@ function wrap(x: number, i: number) {
     return (x & (n - 1)) + (i - n);
 }
 
-function sha256(message: Uint8Array) {
-    const _message = convertUint8ArrayToBitArray(message);
-    const result = sjcl.hash.sha256.hash(_message);
-    return convertBitArrayToUint8Array(result);
+
+function sha256(message: Uint8Array): Uint8Array {
+    return Uint8Array.from(createHash('sha256').update(message).digest());
 }
 
-function hmacSha256(key: Uint8Array, message: Uint8Array) {
-    const _message = convertUint8ArrayToBitArray(message);
-    const _key = convertUint8ArrayToBitArray(key);
-    const hmac = new sjcl.misc.hmac(_key);
-    const result = hmac.mac(_message);
-    return convertBitArrayToUint8Array(result);
+function hmacSha256(key: Uint8Array, message: Uint8Array): Uint8Array {
+    return Uint8Array.from(createHmac('sha256', key as Buffer).update(message).digest());
 }
 
-function pbkdf2Sha256(password: Uint8Array, salt: Uint8Array, count: number, length: number) {
-    const _password = convertUint8ArrayToBitArray(password);
-    const _salt = convertUint8ArrayToBitArray(salt);
-    const result = sjcl.misc.pbkdf2(_password, _salt, count, length * 8);
-    return convertBitArrayToUint8Array(result);
+function pbkdf2Sha256(password: Uint8Array, salt: Uint8Array, count: number, length: number): Uint8Array {
+    const result1 = pbkdf2.pbkdf2Sync(password, salt, count, length, 'sha256');
+    return Uint8Array.from(result1);
 }
 
-function convertUint8ArrayToBitArray(uint8Array: Uint8Array) {
-    // Convert to hex...
-    let hex = '';
-    for (let i = 0; i < uint8Array.length; i++) {
-        hex += (uint8Array[i] >> 4).toString(16);
-        hex += (uint8Array[i] & 0x0f).toString(16);
-    }
-    // ...and then to bitArray.
-    return sjcl.codec.hex.toBits(hex);
-}
-
-function convertBitArrayToUint8Array(bitArray: sjcl.BitArray) {
-    // Convert to hex...
-    const hex = sjcl.codec.hex.fromBits(bitArray);
-    // ...and then to Uint8Array.
-    const bytes = new Uint8Array(hex.length / 2);
-    for (let i = 0; i < hex.length; i += 2) {
-        bytes[i / 2] = parseInt(hex.substr(i, 2), 16);
-    }
-    return bytes;
-}
-
-function convertStringToUint8Array(asciiString: string) {
-    const bytes = new Uint8Array(asciiString.length);
-    for (let i = 0; i < asciiString.length; i++) {
-        bytes[i] = asciiString.charCodeAt(i);
-    }
-    return bytes;
-}
-
-// Copied from: http://stackoverflow.com/a/3885844
 function isInt32(n: number) {
     return n === +n && n === (n | 0);
 }
