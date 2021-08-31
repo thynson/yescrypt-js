@@ -164,7 +164,6 @@ function yescryptKdfBody(
     dkLen: number,
     flags: number = YESCRYPT_RW,
 ) {
-    // password = Uint8Array
     if (flags !== 0) {
         //let key = 'yescrypt';
         let key = [ 121, 101, 115, 99, 114, 121, 112, 116 ];
@@ -177,8 +176,6 @@ function yescryptKdfBody(
     }
 
     let bytes = pbkdf2Sha256(password, salt, 1, p * 128 * r);
-    // TODO: Switch endianness here on big-endian platforms.
-    // View the PBKDF2 results as an array of Uint32.
     let B = new Uint32Array(bytes.buffer);
     if (!isLittleEndian) {
         B = B.map(swapEndian);
@@ -214,8 +211,7 @@ function yescryptKdfBody(
         result.set(storedKey, 0);
     }
 
-    // XXX we shouldn't be keeping around all that memory (gc attacks)
-    return new Uint8Array(result.buffer, result.byteOffset + 0, dkLen);
+    return result.slice(0, dkLen);
 }
 
 function sMix(
