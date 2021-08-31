@@ -10,10 +10,13 @@
     "README.md"
   ],
   "scripts": {
+    "prepare": "tsc",
     "build": "tsc -p tsconfig.build.json",
     "test": "jest",
     "test:coverage": "jest --coverage"
   },
+  "types": "lib/index.d.ts",
+  "main": "lib/index.js",
   "dependencies": {
     "create-hash": "^1.2.0",
     "create-hmac": "^1.1.7",
