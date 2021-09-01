@@ -2,7 +2,7 @@
 yescrypt-js
 ===========
 
-A pure javascript implementation of [yescript] algorithm.
+A pure javascript implementation of [yescrypt] algorithm.
 
 The code is based on [origin work](https://github.com/defuse/yescrypt),
 and then optimized for performance and refined for readability and
@@ -11,7 +11,7 @@ modularization.
 Performance
 -----------
 
-For parameters suggested by [yescript](https://github.com/openwall/yescrypt/blob/main/PARAMETERS), it shall
+For parameters suggested by [yescrypt](https://github.com/openwall/yescrypt/blob/main/PARAMETERS), it shall
 be acceptable for use in browser/client side.
 
 - Small and fast (N=2048, r=8, p=1)
@@ -51,4 +51,4 @@ be acceptable for use in browser/client side.
   
     ```
 
-[yescript]: https://www.openwall.com/yescrypt/
+[yescrypt]: https://www.openwall.com/yescrypt/
